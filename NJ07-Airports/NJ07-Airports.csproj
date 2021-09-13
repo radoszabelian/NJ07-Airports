@@ -7,8 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="airports.dat">
+    <None Update="data\airlines.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="data\airports.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\flights.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

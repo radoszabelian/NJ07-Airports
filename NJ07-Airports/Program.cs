@@ -18,10 +18,15 @@ namespace NJ07_Airports
             List<City> cities = new List<City>();
             List<Country> countries = new List<Country>();
 
-            ParseDataFileAndFillLists(airports, cities, countries);
+            //ParseDataFileAndFillLists(airports, cities, countries);
+            var airlines = CsvHelper.Parse<Airline>(@"data/airlines.dat");
+            var flights = CsvHelper.Parse<Flight>(@"data/flights.dat");
+            
+            Console.WriteLine(airlines.Count());
+            Console.WriteLine(flights.Count());
 
 
-            ShowResults(airports, cities, countries);
+            //ShowResults(airports, cities, countries);
         }
 
         private static void ShowResults(List<Airport> airports, List<City> cities, List<Country> countries)
