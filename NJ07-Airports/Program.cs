@@ -1,4 +1,5 @@
 ﻿using NJ07_Airports.Model;
+using NJ07_Airports.SerializeToJson;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,22 +12,13 @@ namespace NJ07_Airports
     {
         static void Main(string[] args)
         {
-            List<Airport> airports = new List<Airport>();
-            List<City> cities = new List<City>();
-            List<Country> countries = new List<Country>();
+            new Menu().Start();
 
-            CsvHelper.ParseAirportFileAndFillLists(airports, cities, countries);
-
-            var airlines = CsvHelper.Parse<Airline>(@"data/airlines.dat");
-            var flights = CsvHelper.Parse<Flight>(@"data/flights.dat");
-
-            ExerciseResultsUtility.ShowResults(airports, cities, countries);
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(airlines.Count());
-            Console.WriteLine(flights.Count());
-            Console.ForegroundColor = ConsoleColor.White;
-
+            //Console.ForegroundColor = ConsoleColor.Red;
+            //Console.WriteLine(dataHandler.Airlines.Count());
+            //Console.WriteLine(dataHandler.Flights.Count());
+            //Console.ForegroundColor = ConsoleColor.White;
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using NJ07_Airports.Model;
+﻿using NJ07_Airports.Commands;
+using NJ07_Airports.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +9,22 @@ using System.Threading.Tasks;
 
 namespace NJ07_Airports
 {
-    public static class ExerciseResultsUtility
+    public class ExerciseResultsUtility : ICommand
     {
-        public static void ShowResults(List<Airport> airports, List<City> cities, List<Country> countries)
+        private CacheAndDataHandler _handler;
+
+        public ExerciseResultsUtility(CacheAndDataHandler handler)
         {
-            Console.WriteLine($"Parsing complete. Total entries: airports: {airports.Count()}, cities: {cities.Count()}, countries: {countries.Count()}");
+            _handler = handler;
+        }
+
+        public void Start()
+        {
+            var airports = _handler.Airports;
+            var cities = _handler.Cities;
+            var countries = _handler.Countries;
+
+            Console.WriteLine($"Total entries: airports: {airports.Count()}, cities: {cities.Count()}, countries: {countries.Count()}");
 
             ShowTaskA(airports, cities, countries);
 
@@ -25,7 +37,7 @@ namespace NJ07_Airports
             ShowTaskE(airports, cities, countries);
         }
 
-        private static void ShowTaskE(List<Airport> airports, List<City> cities, List<Country> countries)
+        private void ShowTaskE(List<Airport> airports, List<City> cities, List<Country> countries)
         {
             string pattern = @"[euioa]";
             Regex regex = new Regex(pattern);
@@ -38,7 +50,7 @@ namespace NJ07_Airports
             Console.WriteLine($"The airport {result.Name} has the most vowels with {result.Vowels}");
         }
 
-        private static void ShowTaskD(List<Airport> airports, List<City> cities, List<Country> countries)
+        private void ShowTaskD(List<Airport> airports, List<City> cities, List<Country> countries)
         {
             var query = from city in cities
                         join airport in airports on city.Id equals airport.CityId
@@ -48,7 +60,7 @@ namespace NJ07_Airports
             Console.WriteLine($"The city with the longest airport name is: {longestAirportNameCity.CityName}. Airport name is: {longestAirportNameCity.AirportName}");
         }
 
-        private static void ShowTaskC(List<Airport> airports, List<City> cities, List<Country> countries)
+        private void ShowTaskC(List<Airport> airports, List<City> cities, List<Country> countries)
         {
             var query = from country in countries
                         orderby country.Name descending
@@ -65,7 +77,7 @@ namespace NJ07_Airports
             }
         }
 
-        private static void ShowTaskB(List<Airport> airports, List<City> cities, List<Country> countries)
+        private void ShowTaskB(List<Airport> airports, List<City> cities, List<Country> countries)
         {
             var citiesAndAirports = from airport in airports
                                     join city in cities on airport.CityId equals city.Id
@@ -82,7 +94,7 @@ namespace NJ07_Airports
             }
         }
 
-        private static void ShowTaskA(List<Airport> airports, List<City> cities, List<Country> countries)
+        private void ShowTaskA(List<Airport> airports, List<City> cities, List<Country> countries)
         {
             var CountryAirportsQuery = from airport in airports
                                        join country in countries on airport.CountryId equals country.Id
@@ -98,5 +110,9 @@ namespace NJ07_Airports
             }
         }
 
+        public string GetDescription()
+        {
+            return "Shows the results of the queries on the input data.";
+        }
     }
 }

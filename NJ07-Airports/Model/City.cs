@@ -12,5 +12,6 @@ namespace NJ07_Airports.Model
         public int Id { get; set; }
         public string Name { get; set; }
         public string TimeZoneName { get; set; }
+        public TimeZoneInfo TimeZoneInfo { get; set; }
     }
 }
