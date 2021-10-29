@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace NJ07_Airports
 {
@@ -22,6 +20,7 @@ namespace NJ07_Airports
     public static class CsvHelper
     {
         //private static int s_nextCountryId = 0;
+        //TODO ezeket majd metódusokba kitenni
         private static int s_nextCityId = 1;
         private static int s_ignoredRows = 0;
         private static int s_nextCountryId = 1;
@@ -111,13 +110,12 @@ namespace NJ07_Airports
             return DeserializedObject;
         }
 
-
         // ------------------------ //
         // PARSING THE AIRPORT FILE //
         // ------------------------ //
 
         /* Airports, Cities and countries are available in a single input file, so they have to be processed at once. */
-        public static ParsedAirportsDataBundle ParseAirportFile(string inputFilePath)
+        public static ParsedAirportsDataBundle ParseAirportFile(string inputFilePath, ILogger logger)
         {
             List<Airport> airports = new List<Airport>();
             List<City> cities = new List<City>();
@@ -138,14 +136,14 @@ namespace NJ07_Airports
                 }
                 else
                 {
-                    Logger.LogError($"!!! The line {row} is malformed so it is ignored. !!!");
+                    logger.LogError(new Exception("$!!! The line { row } is malformed so it is ignored. !!!"));
                     s_ignoredRows++;
                 }
             }
 
             PopulateTimeZoneDataOfAllLists(cities, airports);
 
-            Logger.LogInfo($"There were a total of {s_ignoredRows} rows ignored.");
+            //logger.Log($"There were a total of {s_ignoredRows} rows ignored.");
 
             var result = new ParsedAirportsDataBundle()
             {

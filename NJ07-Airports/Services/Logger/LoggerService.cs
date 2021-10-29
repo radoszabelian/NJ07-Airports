@@ -7,11 +7,28 @@ using System.Threading.Tasks;
 
 namespace NJ07_Airports.Logging
 {
-    public static class Logger
+    public class LoggerService : ILogger
     {
-        private static readonly NLog.Logger LoggerService = NLog.LogManager.GetCurrentClassLogger();
+        Logger _nlogService;
 
-        static Logger()
+        public LoggerService(Logger nLogService)
+        {
+            _nlogService = nLogService;
+
+            ConfigureNLogService();
+        }
+
+        public void LogError(Exception exception)
+        {
+            _nlogService.Error($"{exception.GetType()} - {exception.Message}");
+        }
+
+        public void LogLine(string message, int lineNumber)
+        {
+            _nlogService.Info($"{lineNumber}. {message}");
+        }
+
+        private void ConfigureNLogService()
         {
             var config = new NLog.Config.LoggingConfiguration();
 
@@ -24,14 +41,5 @@ namespace NJ07_Airports.Logging
             LogManager.Configuration = config;
         }
 
-        public static void LogError(string message)
-        {
-            LoggerService.Error(message);
-        }
-
-        public static void LogInfo(string message)
-        {
-            LoggerService.Info(message);
-        }
     }
 }

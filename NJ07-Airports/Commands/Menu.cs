@@ -1,5 +1,7 @@
 ﻿using NJ07_Airports.Commands;
 using NJ07_Airports.Commands.GeoLocation;
+using NJ07_Airports.Logging;
+using NJ07_Airports.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,24 +12,14 @@ namespace NJ07_Airports
 {
     public class Menu
     {
-        private CacheAndDataHandler handler = new CacheAndDataHandler(@"airports.dat",
-                @"airports.json",
-                @"cities.json",
-                @"countries.json",
-                @"airlines.json",
-                @"flights.json",
-                @"cache",
-                @"data");
-
         List<ICommand> commands;
 
-        public Menu()
+        public Menu(ExerciseResultsUtility resultUtility, GeoLocation geoLocationUtility)
         {
-            handler.InitializeAppData();
             commands = new List<ICommand>()
             {
-                new ExerciseResultsUtility(handler),
-                new GeoLocation(handler)
+                resultUtility,
+                geoLocationUtility
             };
         }
 

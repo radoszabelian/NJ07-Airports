@@ -1,10 +1,10 @@
-﻿using NJ07_Airports.Model;
-using NJ07_Airports.SerializeToJson;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NJ07_Airports.Commands.GeoLocation;
+using NJ07_Airports.Logging;
+using NJ07_Airports.Model;
+using System.Threading.Tasks;
 
 namespace NJ07_Airports
 {
@@ -12,13 +12,24 @@ namespace NJ07_Airports
     {
         static void Main(string[] args)
         {
-            new Menu().Start();
+            //https://pradeeploganathan.com/dotnet/configuration-in-a-net-core-console-application/
+            var inputPathsConfiguration = new InputPathsConfiguration();
 
-            //Console.ForegroundColor = ConsoleColor.Red;
-            //Console.WriteLine(dataHandler.Airlines.Count());
-            //Console.WriteLine(dataHandler.Flights.Count());
-            //Console.ForegroundColor = ConsoleColor.White;
+            IConfiguration Configuration = new ConfigurationBuilder()
+                .AddJsonFile("appSettings.json")
+                .Build();
+
+            Configuration.Bind("InputPaths", inputPathsConfiguration);
+
+            var serviceProvider = new ServiceCollection()
+                .AddSingleton<ILogger, LoggerService>()
+                .AddSingleton(inputPathsConfiguration)
+                .AddSingleton<ExerciseResultsUtility>()
+                .AddSingleton<GeoLocation>()
+                .AddSingleton<Menu>()
+                .BuildServiceProvider();
+
+            serviceProvider.GetService<Menu>().Start();
         }
-
     }
 }
