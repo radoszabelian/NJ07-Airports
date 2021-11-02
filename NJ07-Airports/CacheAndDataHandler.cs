@@ -1,13 +1,16 @@
-﻿using NJ07_Airports.Model;
+﻿using NJ07_Airports.Logging;
+using NJ07_Airports.Model;
 using NJ07_Airports.Parser;
 using NJ07_Airports.SerializeToJson;
+using NJ07_Airports.Services.CsvHelper;
+using NJ07_Airports.Services.CsvHelper.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace NJ07_Airports
 {
-    public class CacheAndDataHandler
+    public class CacheAndDataHandler : ICacheAndDataHandler
     {
         public List<City> Cities { get; set; }
         public List<Country> Countries { get; set; }
@@ -15,38 +18,22 @@ namespace NJ07_Airports
         public List<Airline> Airlines { get; set; }
         public List<Flight> Flights { get; set; }
 
-        private readonly string _cacheFolder;
-        private readonly string _rawFolder;
+        private readonly InputPathsConfiguration _options;
 
-        private readonly string _airportsRawFileName;
+        private ICsvHelper _csvHelper;
+        private IAirportsDataConverter _airportsDataConverter;
 
-        private readonly string _airportCacheFileName;
-        private readonly string _citiesCacheFileName;
-        private readonly string _countriesCacheFileName;
-        private readonly string _flightsCacheFileName;
-        private readonly string _airlinesCacheFileName;
-
-        public CacheAndDataHandler(string airportRawFileName,
-            string airportCacheFileName,
-            string citiesCacheFileName,
-            string countriesCacheFileName,
-            string airlinesCacheFileName,
-            string flightsCacheFileName,
-            string cacheFolder,
-            string rawFolder)
+        public CacheAndDataHandler(InputPathsConfiguration options,
+            ICsvHelper csvHelper, IAirportsDataConverter airportsDataConverter)
         {
-            _airportsRawFileName = airportRawFileName;
-            _airportCacheFileName = airportCacheFileName;
-            _citiesCacheFileName = citiesCacheFileName;
-            _countriesCacheFileName = countriesCacheFileName;
-            _flightsCacheFileName = flightsCacheFileName;
-            _airlinesCacheFileName = airlinesCacheFileName;
+            _options = options;
+            _csvHelper = csvHelper;
+            _airportsDataConverter = airportsDataConverter;
 
-            _cacheFolder = cacheFolder;
-            _rawFolder = rawFolder;
+            InitializeAppData();
         }
 
-        public void InitializeAppData()
+        private void InitializeAppData()
         {
             if (IsCacheAvailable())
             {
@@ -61,46 +48,47 @@ namespace NJ07_Airports
 
         private bool IsCacheAvailable()
         {
-            return File.Exists(Path.Combine(_cacheFolder, _countriesCacheFileName))
-                    && File.Exists(Path.Combine(_cacheFolder, _airportCacheFileName))
-                    && File.Exists(Path.Combine(_cacheFolder, _citiesCacheFileName))
-                    && File.Exists(Path.Combine(_cacheFolder, _airlinesCacheFileName))
-                    && File.Exists(Path.Combine(_cacheFolder, _flightsCacheFileName));
+            return File.Exists(Path.Combine(_options.CacheFolderName, _options.CountriesCacheFileName))
+                    && File.Exists(Path.Combine(_options.CacheFolderName, _options.AirportsRawFileName))
+                    && File.Exists(Path.Combine(_options.CacheFolderName, _options.CitiesCacheFileName))
+                    && File.Exists(Path.Combine(_options.CacheFolderName, _options.AirlinesCacheFileName))
+                    && File.Exists(Path.Combine(_options.CacheFolderName, _options.FlightsCacheFileName));
         }
 
         private void ReadDataFromCache()
         {
-            Airports = Serializer.DeserializeFromJson<IEnumerable<Airport>>(Path.Combine(_cacheFolder, _airportCacheFileName)).ToList();
-            Cities = Serializer.DeserializeFromJson<IEnumerable<City>>(Path.Combine(_cacheFolder, _citiesCacheFileName)).ToList();
-            Countries = Serializer.DeserializeFromJson<IEnumerable<Country>>(Path.Combine(_cacheFolder, _countriesCacheFileName)).ToList();
-            Airlines = Serializer.DeserializeFromJson<IEnumerable<Airline>>(Path.Combine(_cacheFolder, _airlinesCacheFileName)).ToList();
-            Flights = Serializer.DeserializeFromJson<IEnumerable<Flight>>(Path.Combine(_cacheFolder, _flightsCacheFileName)).ToList();
+            Airports = Serializer.DeserializeFromJson<IEnumerable<Airport>>(Path.Combine(_options.CacheFolderName, _options.AirportsRawFileName)).ToList();
+            Cities = Serializer.DeserializeFromJson<IEnumerable<City>>(Path.Combine(_options.CacheFolderName, _options.CitiesCacheFileName)).ToList();
+            Countries = Serializer.DeserializeFromJson<IEnumerable<Country>>(Path.Combine(_options.CacheFolderName, _options.CountriesCacheFileName)).ToList();
+            Airlines = Serializer.DeserializeFromJson<IEnumerable<Airline>>(Path.Combine(_options.CacheFolderName, _options.AirlinesCacheFileName)).ToList();
+            Flights = Serializer.DeserializeFromJson<IEnumerable<Flight>>(Path.Combine(_options.CacheFolderName, _options.FlightsCacheFileName)).ToList();
         }
 
         private void ParseRawDataFiles()
         {
-            ParsedAirportsDataBundle result = CsvHelper.ParseAirportFile(Path.Combine(_rawFolder, _airportsRawFileName));
+            List<AirportsParseResult> airportsParseResult = _csvHelper.Parse<AirportsParseResult>(Path.Combine(_options.RawFolderName, _options.AirportsRawFileName));
+            var airportsConversionResult = _airportsDataConverter.ConvertToModel(airportsParseResult);
 
-            Airports = result.Airports;
-            Cities = result.Cities;
-            Countries = result.Countries;
+            Airports = airportsConversionResult.Airports;
+            Cities = airportsConversionResult.Cities;
+            Countries = airportsConversionResult.Countries;
 
-            Airlines = CsvHelper.Parse<Airline>(Path.Combine(_rawFolder, "airlines.dat"));
-            Flights = CsvHelper.Parse<Flight>(Path.Combine(_rawFolder, "flights.dat"));
+            Airlines = _csvHelper.Parse<Airline>(Path.Combine(_options.RawFolderName, _options.AirlinesRawFileName));
+            Flights = _csvHelper.Parse<Flight>(Path.Combine(_options.RawFolderName, _options.FlightsRawFileName));
         }
 
         private void SaveDataToCache()
         {
-            if (!Directory.Exists(@"cache"))
+            if (!Directory.Exists(_options.CacheFolderName))
             {
-                Directory.CreateDirectory(@"cache");
+                Directory.CreateDirectory(_options.CacheFolderName);
             }
 
-            Serializer.SerializeToJson(Airports, Path.Combine(_cacheFolder, _airportCacheFileName));
-            Serializer.SerializeToJson(Cities, Path.Combine(_cacheFolder, _citiesCacheFileName));
-            Serializer.SerializeToJson(Countries, Path.Combine(_cacheFolder, _countriesCacheFileName));
-            Serializer.SerializeToJson(Flights, Path.Combine(_cacheFolder, _flightsCacheFileName));
-            Serializer.SerializeToJson(Airlines, Path.Combine(_cacheFolder, _airlinesCacheFileName));
+            Serializer.SerializeToJson(Airports, Path.Combine(_options.CacheFolderName, _options.AirportsRawFileName));
+            Serializer.SerializeToJson(Cities, Path.Combine(_options.CacheFolderName, _options.CitiesCacheFileName));
+            Serializer.SerializeToJson(Countries, Path.Combine(_options.CacheFolderName, _options.CountriesCacheFileName));
+            Serializer.SerializeToJson(Flights, Path.Combine(_options.CacheFolderName, _options.FlightsCacheFileName));
+            Serializer.SerializeToJson(Airlines, Path.Combine(_options.CacheFolderName, _options.AirlinesCacheFileName));
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NJ07_Airports.Parser
+namespace NJ07_Airports.Services.CsvHelper.Models
 {
-    public class ParsedAirportsDataBundle
+    public class AirportsExtractedBundle
     {
         public List<Airport> Airports { get; set; }
         public List<City> Cities { get; set; }

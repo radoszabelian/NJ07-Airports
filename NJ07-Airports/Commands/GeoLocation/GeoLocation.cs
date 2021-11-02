@@ -10,9 +10,9 @@ namespace NJ07_Airports.Commands.GeoLocation
 {
     public class GeoLocation : ICommand
     {
-        private CacheAndDataHandler _handler;
+        private ICacheAndDataHandler _handler;
 
-        public GeoLocation(CacheAndDataHandler handler)
+        public GeoLocation(ICacheAndDataHandler handler)
         {
             _handler = handler;
         }
