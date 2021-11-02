@@ -11,9 +11,9 @@ namespace NJ07_Airports
 {
     public class ExerciseResultsUtility : ICommand
     {
-        private CacheAndDataHandler _handler;
+        private ICacheAndDataHandler _handler;
 
-        public ExerciseResultsUtility(CacheAndDataHandler handler)
+        public ExerciseResultsUtility(ICacheAndDataHandler handler)
         {
             _handler = handler;
         }

@@ -2,13 +2,15 @@
 using NJ07_Airports.Model;
 using NJ07_Airports.Parser;
 using NJ07_Airports.SerializeToJson;
+using NJ07_Airports.Services.CsvHelper;
+using NJ07_Airports.Services.CsvHelper.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace NJ07_Airports
 {
-    public class CacheAndDataHandler
+    public class CacheAndDataHandler : ICacheAndDataHandler
     {
         public List<City> Cities { get; set; }
         public List<Country> Countries { get; set; }
@@ -18,13 +20,15 @@ namespace NJ07_Airports
 
         private readonly InputPathsConfiguration _options;
 
-        private ILogger _logger;
+        private ICsvHelper _csvHelper;
+        private IAirportsDataConverter _airportsDataConverter;
 
         public CacheAndDataHandler(InputPathsConfiguration options,
-            ILogger logger)
+            ICsvHelper csvHelper, IAirportsDataConverter airportsDataConverter)
         {
             _options = options;
-            _logger = logger;
+            _csvHelper = csvHelper;
+            _airportsDataConverter = airportsDataConverter;
 
             InitializeAppData();
         }
@@ -62,14 +66,15 @@ namespace NJ07_Airports
 
         private void ParseRawDataFiles()
         {
-            ParsedAirportsDataBundle result = CsvHelper.ParseAirportFile(Path.Combine(_options.RawFolderName, _options.AirportsRawFileName), _logger);
+            List<AirportsParseResult> airportsParseResult = _csvHelper.Parse<AirportsParseResult>(Path.Combine(_options.RawFolderName, _options.AirportsRawFileName));
+            var airportsConversionResult = _airportsDataConverter.ConvertToModel(airportsParseResult);
 
-            Airports = result.Airports;
-            Cities = result.Cities;
-            Countries = result.Countries;
+            Airports = airportsConversionResult.Airports;
+            Cities = airportsConversionResult.Cities;
+            Countries = airportsConversionResult.Countries;
 
-            Airlines = CsvHelper.Parse<Airline>(Path.Combine(_options.RawFolderName, _options.AirlinesRawFileName));
-            Flights = CsvHelper.Parse<Flight>(Path.Combine(_options.RawFolderName, _options.FlightsRawFileName));
+            Airlines = _csvHelper.Parse<Airline>(Path.Combine(_options.RawFolderName, _options.AirlinesRawFileName));
+            Flights = _csvHelper.Parse<Flight>(Path.Combine(_options.RawFolderName, _options.FlightsRawFileName));
         }
 
         private void SaveDataToCache()

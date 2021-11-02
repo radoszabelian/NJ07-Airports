@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NJ07_Airports.Commands.GeoLocation;
 using NJ07_Airports.Logging;
 using NJ07_Airports.Model;
-using System.Threading.Tasks;
+using NJ07_Airports.Services.CsvHelper;
 
 namespace NJ07_Airports
 {
@@ -25,6 +24,9 @@ namespace NJ07_Airports
                 .AddSingleton<ILogger, LoggerService>()
                 .AddSingleton(inputPathsConfiguration)
                 .AddSingleton<ExerciseResultsUtility>()
+                .AddSingleton<IAirportsDataConverter, AirportsDataConverter>()
+                .AddSingleton<ICacheAndDataHandler, CacheAndDataHandler>()
+                .AddSingleton<ICsvHelper, CsvHelper>()
                 .AddSingleton<GeoLocation>()
                 .AddSingleton<Menu>()
                 .BuildServiceProvider();
