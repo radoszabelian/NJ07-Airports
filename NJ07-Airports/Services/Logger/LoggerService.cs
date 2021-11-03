@@ -1,31 +1,27 @@
-﻿using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NJ07_Airports.Logging
+﻿namespace NJ07_Airports.Logging
 {
+    using System;
+    using NLog;
+
     public class LoggerService : ILogger
     {
-        Logger _nlogService;
+        private Logger nlogService;
 
         public LoggerService(Logger nLogService)
         {
-            _nlogService = nLogService;
+            this.nlogService = nLogService;
 
-            ConfigureNLogService();
+            this.ConfigureNLogService();
         }
 
         public void LogError(Exception exception)
         {
-            _nlogService.Error($"{exception.GetType()} - {exception.Message}");
+            this.nlogService.Error($"{exception.GetType()} - {exception.Message}");
         }
 
         public void LogLine(string message, int lineNumber)
         {
-            _nlogService.Info($"{lineNumber}. {message}");
+            this.nlogService.Info($"{lineNumber}. {message}");
         }
 
         private void ConfigureNLogService()
@@ -40,6 +36,5 @@ namespace NJ07_Airports.Logging
 
             LogManager.Configuration = config;
         }
-
     }
 }

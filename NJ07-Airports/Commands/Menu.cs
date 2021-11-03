@@ -1,40 +1,46 @@
-﻿using NJ07_Airports.Commands;
-using NJ07_Airports.Commands.GeoLocation;
-using NJ07_Airports.Logging;
-using NJ07_Airports.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NJ07_Airports
+﻿namespace NJ07_Airports
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using NJ07_Airports.Commands;
+    using NJ07_Airports.Commands.GeoLocation;
+    using NJ07_Airports.Logging;
+    using NJ07_Airports.Model;
+
+    /// <summary>
+    /// This class shows a menu with options, and allows the user to choose what the program do next.
+    /// </summary>
     public class Menu
     {
-        List<ICommand> commands;
+        private List<ICommand> commands;
 
         public Menu(ExerciseResultsUtility resultUtility, GeoLocation geoLocationUtility)
         {
-            commands = new List<ICommand>()
+            this.commands = new List<ICommand>()
             {
                 resultUtility,
-                geoLocationUtility
+                geoLocationUtility,
             };
         }
 
+        /// <summary>
+        /// Starts the menu loop. Showing menu - User chooses something - Doing stuff - Asking again.
+        /// </summary>
         public void Start()
         {
             int selectedCommandId = -99;
 
             while (selectedCommandId != 0)
             {
-                ShowCommands();
-                selectedCommandId = GetPrompt();
+                this.ShowCommands();
+                selectedCommandId = this.GetPrompt();
 
-                if (selectedCommandId >= 0 && commands.Count() > selectedCommandId)
+                if (selectedCommandId >= 0 && this.commands.Count() > selectedCommandId)
                 {
-                    commands.ElementAt(selectedCommandId).Start();
+                    this.commands.ElementAt(selectedCommandId).Start();
                 }
                 else
                 {
@@ -62,7 +68,7 @@ namespace NJ07_Airports
         private void ShowCommands()
         {
             var i = 0;
-            foreach (var item in commands)
+            foreach (var item in this.commands)
             {
                 Console.WriteLine($"{i} - {item.GetDescription()}");
                 i++;

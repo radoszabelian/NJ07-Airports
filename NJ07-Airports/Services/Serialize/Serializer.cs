@@ -1,15 +1,16 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NJ07_Airports.SerializeToJson
+﻿namespace NJ07_Airports.SerializeToJson
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+
     public static class Serializer
     {
-        public static void SerializeToJson<T>(T objectsToSerialize, string outputFilePath) {
+        public static void SerializeToJson<T>(T objectsToSerialize, string outputFilePath)
+        {
             var outputString = JsonConvert.SerializeObject(objectsToSerialize);
             System.IO.File.WriteAllText(outputFilePath, outputString);
         }

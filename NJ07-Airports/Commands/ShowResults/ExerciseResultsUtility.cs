@@ -1,40 +1,43 @@
-﻿using NJ07_Airports.Commands;
-using NJ07_Airports.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace NJ07_Airports
+﻿namespace NJ07_Airports
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using NJ07_Airports.Commands;
+    using NJ07_Airports.Model;
+
     public class ExerciseResultsUtility : ICommand
     {
-        private ICacheAndDataHandler _handler;
+        private ICacheAndDataHandler handler;
 
         public ExerciseResultsUtility(ICacheAndDataHandler handler)
         {
-            _handler = handler;
+            this.handler = handler;
         }
 
         public void Start()
         {
-            var airports = _handler.Airports;
-            var cities = _handler.Cities;
-            var countries = _handler.Countries;
+            var airports = this.handler.Airports;
+            var cities = this.handler.Cities;
+            var countries = this.handler.Countries;
 
             Console.WriteLine($"Total entries: airports: {airports.Count()}, cities: {cities.Count()}, countries: {countries.Count()}");
 
-            ShowTaskA(airports, cities, countries);
+            this.ShowTaskA(airports, cities, countries);
 
-            ShowTaskB(airports, cities, countries);
+            this.ShowTaskB(airports, cities, countries);
 
-            ShowTaskC(airports, cities, countries);
+            this.ShowTaskC(airports, cities, countries);
 
-            ShowTaskD(airports, cities, countries);
+            this.ShowTaskD(airports, cities, countries);
 
-            ShowTaskE(airports, cities, countries);
+            this.ShowTaskE(airports, cities, countries);
+        }
+
+        public string GetDescription()
+        {
+            return "Shows the results of the queries on the input data.";
         }
 
         private void ShowTaskE(List<Airport> airports, List<City> cities, List<Country> countries)
@@ -96,23 +99,18 @@ namespace NJ07_Airports
 
         private void ShowTaskA(List<Airport> airports, List<City> cities, List<Country> countries)
         {
-            var CountryAirportsQuery = from airport in airports
+            var countryAirportsQuery = from airport in airports
                                        join country in countries on airport.CountryId equals country.Id
                                        orderby country.Name ascending
                                        group airport by country.Name;
 
-            foreach (var countryAirport in CountryAirportsQuery)
+            foreach (var countryAirport in countryAirportsQuery)
             {
                 foreach (var item in countryAirport)
                 {
                     Console.WriteLine($"--> Country {countryAirport.Key} has {countryAirport.Count()} airports.");
                 }
             }
-        }
-
-        public string GetDescription()
-        {
-            return "Shows the results of the queries on the input data.";
         }
     }
 }

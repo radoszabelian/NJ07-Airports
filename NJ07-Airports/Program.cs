@@ -1,24 +1,24 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using NJ07_Airports.Commands.GeoLocation;
-using NJ07_Airports.Logging;
-using NJ07_Airports.Model;
-using NJ07_Airports.Services.CsvHelper;
-
-namespace NJ07_Airports
+﻿namespace NJ07_Airports
 {
-    class Program
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using NJ07_Airports.Commands.GeoLocation;
+    using NJ07_Airports.Logging;
+    using NJ07_Airports.Model;
+    using NJ07_Airports.Services.CsvHelper;
+
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            //https://pradeeploganathan.com/dotnet/configuration-in-a-net-core-console-application/
+            // https://pradeeploganathan.com/dotnet/configuration-in-a-net-core-console-application/
             var inputPathsConfiguration = new InputPathsConfiguration();
 
-            IConfiguration Configuration = new ConfigurationBuilder()
+            IConfiguration configuration = new ConfigurationBuilder()
                 .AddJsonFile("appSettings.json")
                 .Build();
 
-            Configuration.Bind("InputPaths", inputPathsConfiguration);
+            configuration.Bind("InputPaths", inputPathsConfiguration);
 
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<ILogger, LoggerService>()

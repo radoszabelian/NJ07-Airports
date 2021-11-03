@@ -1,17 +1,17 @@
-﻿using NJ07_Airports.Model;
-using NJ07_Airports.Parser;
-using NJ07_Airports.Services.CsvHelper.Models;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-
-namespace NJ07_Airports.Services.CsvHelper
+﻿namespace NJ07_Airports.Services.CsvHelper
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using NJ07_Airports.Model;
+    using NJ07_Airports.Parser;
+    using NJ07_Airports.Services.CsvHelper.Models;
+
     public class AirportsDataConverter : IAirportsDataConverter
     {
-        int nextCityId = 0;
-        int nextCountryId = 0;
+        private int nextCityId = 0;
+        private int nextCountryId = 0;
 
         public AirportsExtractedBundle ConvertToModel(List<AirportsParseResult> airportsParseResult)
         {
@@ -24,25 +24,25 @@ namespace NJ07_Airports.Services.CsvHelper
                 var existingCountry = countries.FirstOrDefault(c => c.Name == airportsParseResultItem.CountryName);
                 if (existingCountry == null)
                 {
-                    countries.Add(CreateNewCountryObject(airportsParseResultItem));
+                    countries.Add(this.CreateNewCountryObject(airportsParseResultItem));
                 }
 
                 var existingCity = cities.FirstOrDefault(c => c.Name == airportsParseResultItem.CityName);
                 if (existingCity == null)
                 {
-                    cities.Add(CreateNewCityObject(airportsParseResultItem, countries));
+                    cities.Add(this.CreateNewCityObject(airportsParseResultItem, countries));
                 }
 
-                airports.Add(CreateNewAirportObject(airportsParseResultItem, countries, cities));
+                airports.Add(this.CreateNewAirportObject(airportsParseResultItem, countries, cities));
             }
 
-            PopulateTimeZoneDataOfAllLists(cities, airports);
+            this.PopulateTimeZoneDataOfAllLists(cities, airports);
 
             return new AirportsExtractedBundle()
             {
                 Airports = airports,
                 Cities = cities,
-                Countries = countries
+                Countries = countries,
             };
         }
 
@@ -74,9 +74,9 @@ namespace NJ07_Airports.Services.CsvHelper
                 {
                     Altitude = gpsAltitude,
                     Latitude = gpsLatitude,
-                    Longitude = gpsLongitude
+                    Longitude = gpsLongitude,
                 },
-                TimeZoneName = relatedCity.TimeZoneName
+                TimeZoneName = relatedCity.TimeZoneName,
             };
 
             return newAirport;
@@ -92,12 +92,12 @@ namespace NJ07_Airports.Services.CsvHelper
             var newCountry = new Country()
             {
                 Name = countryName,
-                Id = nextCountryId,
+                Id = this.nextCountryId,
                 ThreeLetterISOCode = currentRegion?.ThreeLetterISORegionName,
-                TwoLetterISOCode = currentRegion?.TwoLetterISORegionName
+                TwoLetterISOCode = currentRegion?.TwoLetterISORegionName,
             };
 
-            nextCountryId++;
+            this.nextCountryId++;
 
             return newCountry;
         }
@@ -112,13 +112,13 @@ namespace NJ07_Airports.Services.CsvHelper
             City newCity = new City()
             {
                 Name = cityName,
-                Id = nextCityId,
+                Id = this.nextCityId,
                 CountryId = relatedCountry.Id,
-                TimeZoneName = "",
-                TimeZoneInfo = null
+                TimeZoneName = string.Empty,
+                TimeZoneInfo = null,
             };
 
-            nextCityId++;
+            this.nextCityId++;
             return newCity;
         }
 
