@@ -1,37 +1,30 @@
-﻿namespace NJ07_Airports
+﻿namespace Airports_CLI
 {
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using NJ07_Airports.Commands.GeoLocation;
-    using NJ07_Airports.Logging;
-    using NJ07_Airports.Model;
-    using NJ07_Airports.Services.CsvHelper;
+    using Airports_IO.Services;
+    using Airports_Logic;
+    using Airports_Logic.Services;
+    using Autofac;
 
     public class Program
     {
         public static void Main(string[] args)
         {
-            // https://pradeeploganathan.com/dotnet/configuration-in-a-net-core-console-application/
-            var inputPathsConfiguration = new InputPathsConfiguration();
+            var builder = new ContainerBuilder();
 
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddJsonFile("appSettings.json")
-                .Build();
+            builder.RegisterType<DataHandler>().As<IDataHandler>();
+            builder.RegisterType<LoggerService>().As<ILogger>();
+            builder.RegisterInstance(new ConfigService("appSettings.json")).As<IConfig>();
+            builder.RegisterType<AirportsDataConverter>().As<IAirportsDataConverter>();
+            builder.RegisterType<LoggerService>().As<ILogger>();
+            builder.RegisterType<GeoLocation>();
+            builder.RegisterType<ExerciseResultsUtility>();
+            builder.RegisterType<CsvHelper>().As<ICsvHelper>();
+            builder.RegisterType<Serializer>().As<ISerializer>();
+            builder.RegisterType<Menu>();
 
-            configuration.Bind("InputPaths", inputPathsConfiguration);
+            var container = builder.Build();
 
-            var serviceProvider = new ServiceCollection()
-                .AddSingleton<ILogger, LoggerService>()
-                .AddSingleton(inputPathsConfiguration)
-                .AddSingleton<ExerciseResultsUtility>()
-                .AddSingleton<IAirportsDataConverter, AirportsDataConverter>()
-                .AddSingleton<ICacheAndDataHandler, CacheAndDataHandler>()
-                .AddSingleton<ICsvHelper, CsvHelper>()
-                .AddSingleton<GeoLocation>()
-                .AddSingleton<Menu>()
-                .BuildServiceProvider();
-
-            serviceProvider.GetService<Menu>().Start();
+            container.Resolve<Menu>().Start();
         }
     }
 }

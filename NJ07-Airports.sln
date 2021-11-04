@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NJ07-Airports", "NJ07-Airports\NJ07-Airports.csproj", "{7CC23F2E-749D-4CD6-93F3-366B75923364}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Airports-CLI", "NJ07-Airports\Airports-CLI.csproj", "{7CC23F2E-749D-4CD6-93F3-366B75923364}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{7D18A64D-4FFD-42E5-99F1-47C8F7F9D4D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{7D18A64D-4FFD-42E5-99F1-47C8F7F9D4D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airports-IO", "Airports-IO\Airports-IO.csproj", "{7FA1EB86-CEFB-473D-BDE8-6379D633DD31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airports-Logic", "Airports-Logic\Airports-Logic.csproj", "{83F377F6-09D3-4654-A2F2-DBF014626E74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{7D18A64D-4FFD-42E5-99F1-47C8F7F9D4D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D18A64D-4FFD-42E5-99F1-47C8F7F9D4D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D18A64D-4FFD-42E5-99F1-47C8F7F9D4D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FA1EB86-CEFB-473D-BDE8-6379D633DD31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FA1EB86-CEFB-473D-BDE8-6379D633DD31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FA1EB86-CEFB-473D-BDE8-6379D633DD31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FA1EB86-CEFB-473D-BDE8-6379D633DD31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83F377F6-09D3-4654-A2F2-DBF014626E74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83F377F6-09D3-4654-A2F2-DBF014626E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83F377F6-09D3-4654-A2F2-DBF014626E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83F377F6-09D3-4654-A2F2-DBF014626E74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
