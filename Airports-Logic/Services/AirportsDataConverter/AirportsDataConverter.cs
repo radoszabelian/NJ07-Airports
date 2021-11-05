@@ -18,6 +18,18 @@
             List<City> cities = new List<City>();
             List<Country> countries = new List<Country>();
 
+            var resultBundle = new AirportsExtractedBundle()
+            {
+                Airports = airports,
+                Cities = cities,
+                Countries = countries,
+            };
+
+            if (airportsParseResult == null)
+            {
+                return resultBundle;
+            }
+
             foreach (var airportsParseResultItem in airportsParseResult)
             {
                 var existingCountry = countries.FirstOrDefault(c => c.Name == airportsParseResultItem.CountryName);
@@ -37,12 +49,7 @@
 
             this.PopulateTimeZoneDataOfAllLists(cities, airports);
 
-            return new AirportsExtractedBundle()
-            {
-                Airports = airports,
-                Cities = cities,
-                Countries = countries,
-            };
+            return resultBundle;
         }
 
         private Airport CreateNewAirportObject(AirportsParseResult airportsParseResultItem, List<Country> countries, List<City> cities)
