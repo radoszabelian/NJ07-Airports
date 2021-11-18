@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Airports_IO.Models;
+    using Airports_IO.Model;
 
     public class CsvHelper : ICsvHelper
     {

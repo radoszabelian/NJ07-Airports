@@ -2,8 +2,8 @@ namespace Airports_Logic_Tests
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Airports_IO.Models;
-    using Airports_Logic.Services;
+    using Airports_IO.Model;
+    using Airports_IO.Services;
     using FluentAssertions;
     using NUnit.Framework;
 
