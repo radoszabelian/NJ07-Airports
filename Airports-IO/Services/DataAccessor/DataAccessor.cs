@@ -7,11 +7,18 @@
     using IOModel = Airports_IO.Model;
     using Airports_Settings.Model;
     using AutoMapper;
-    using System;
     using Airports_Settings.Services;
+    using System;
+    using Microsoft.EntityFrameworkCore;
 
     public class DataAccessor : BsModel.IDataAccessor
     {
+        private IEnumerable<BsModel.City> cities;
+        private IEnumerable<BsModel.Country> countries;
+        private IEnumerable<BsModel.Airport> airports;
+        private IEnumerable<BsModel.Airline> airlines;
+        private IEnumerable<BsModel.Flight> flights;
+
         private readonly FilePaths options;
         private IConfig configService;
         private ICsvHelper csvHelper;
@@ -34,29 +41,199 @@
             this.InitializeAppData();
         }
 
-        public IEnumerable<BsModel.City> Cities { get; set; }
+        public IEnumerable<BsModel.City> Cities
+        {
+            get
+            {
+                return cities;
+            }
+        }
 
-        public IEnumerable<BsModel.Country> Countries { get; set; }
+        public IEnumerable<BsModel.Country> Countries
+        {
+            get
+            {
+                return countries;
+            }
+        }
 
-        public IEnumerable<BsModel.Airport> Airports { get; set; }
+        public IEnumerable<BsModel.Airport> Airports
+        {
+            get
+            {
+                return airports;
+            }
+        }
 
-        public IEnumerable<BsModel.Airline> Airlines { get; set; }
+        public IEnumerable<BsModel.Airline> Airlines
+        {
+            get
+            {
+                return airlines;
+            }
+        }
 
-        public IEnumerable<BsModel.Flight> Flights { get; set; }
+        public IEnumerable<BsModel.Flight> Flights
+        {
+            get
+            {
+                return flights;
+            }
+        }
 
         private void InitializeAppData()
         {
             CreateAutoMapperMappings();
 
-            if (this.IsCacheAvailable())
-            {
-                this.ReadDataFromCache();
-            }
-            else
+            if (!this.IsCacheAvailable())
             {
                 this.ParseRawDataFiles();
                 this.SaveDataToCache();
             }
+
+            if (!this.IsDbAvailable())
+            {
+                this.SeedDbFromCache();
+            }
+
+            this.LoadDataFromDb();
+        }
+
+        private bool IsDbAvailable()
+        {
+            using (var context = new AirportsContext())
+            {
+                return context.Airports.Any();
+            }
+        }
+
+        private void LoadDataFromDb()
+        {
+            using (var context = new AirportsContext())
+            {
+                var airportsEntities = context.Airports
+                    .Include(a => a.Country)
+                    .Include(a => a.City)
+                    .ToList();
+
+                this.airports = Convert<Entities.Airport, BsModel.Airport>(airportsEntities);
+                var index = 0;
+                foreach (var airport in airports)
+                {
+                    airport.Location = new BsModel.Location()
+                    {
+                        Altitude = airportsEntities[index].Altitude,
+                        Longitude = airportsEntities[index].Latitude,
+                        Latitude = airportsEntities[index].Latitude
+                    };
+                    index++;
+                }
+                //int index = 0;
+                //foreach (var airport in airports)
+                //{
+                //    try
+                //    {
+                //        airport.TimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(airportsEntities[index]?.TimeZoneInfoId) ?? null;
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        airport.TimeZoneInfo = null;
+                //    }
+                //    index++;
+                //}
+
+                var citiesEntities = context.Cities
+                    .Include(c => c.Country)
+                    .ToList();
+
+                this.cities = Convert<Entities.City, BsModel.City>(citiesEntities);
+
+                //index = 0;
+                //foreach (var city in cities)
+                //{
+                //    try
+                //    {
+                //        city.TimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(citiesEntities[index]?.TimeZoneInfoId) ?? null;
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        city.TimeZoneInfo = null;
+                //    }
+                //    index++;
+                //}
+
+                var countriesEntities = context.Countries.ToList();
+                this.countries = Convert<Entities.Country, BsModel.Country>(countriesEntities);
+
+                var airlineEntities = context.Airlines.ToList();
+                this.airlines = Convert<Entities.Airline, BsModel.Airline>(airlineEntities);
+
+                var flightsEntities = context.Flights.Include(f => f.Segment).ToList();
+                this.flights = Convert<Entities.Flight, BsModel.Flight>(flightsEntities);
+            }
+        }
+
+        private void SeedDbFromCache()
+        {
+            var ioAirports = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airport>>(Path.Combine(this.options.CacheFolderName, this.options.AirportsRawFileName)).ToList();
+            var ioCities = this.serializer.DeserializeFromJson<IEnumerable<IOModel.City>>(Path.Combine(this.options.CacheFolderName, this.options.CitiesCacheFileName)).ToList();
+            var ioCountries = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Country>>(Path.Combine(this.options.CacheFolderName, this.options.CountriesCacheFileName)).ToList();
+            var ioAirlines = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airline>>(Path.Combine(this.options.CacheFolderName, this.options.AirlinesCacheFileName)).ToList();
+            var ioFlights = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Flight>>(Path.Combine(this.options.CacheFolderName, this.options.FlightsCacheFileName)).ToList();
+
+            var countriesEntities = Convert<IOModel.Country, Entities.Country>(ioCountries);
+            var airlinesEntities = Convert<IOModel.Airline, Entities.Airline>(ioAirlines);
+            var flightsEntities = Convert<IOModel.Flight, Entities.Flight>(ioFlights);
+            var airportEntities = Convert<IOModel.Airport, Entities.Airport>(ioAirports);
+            var citiesEntities = Convert<IOModel.City, Entities.City>(ioCities);
+
+            int index = 0;
+            foreach (var airportEntity in airportEntities)
+            {
+                airportEntity.TimeZoneInfoId = ioAirports[index]?.TimeZoneInfo?.Id ?? "";
+                airportEntity.Latitude = ioAirports[index].Location.Latitude;
+                airportEntity.Altitude = ioAirports[index].Location.Altitude;
+                airportEntity.Longitude = ioAirports[index].Location.Longitude;
+                index++;
+            }
+
+            index = 0;
+            foreach (var cityEntity in citiesEntities)
+            {
+                cityEntity.TimeZoneInfoId = ioCities[index]?.TimeZoneInfo?.Id ?? "";
+                index++;
+            }
+
+            using (var context = new AirportsContext())
+            {
+                context.Airlines.AddRange(airlinesEntities);
+                context.SaveChanges();
+            }
+            using (var context = new AirportsContext())
+            {
+                context.Countries.AddRange(countriesEntities);
+                context.SaveChanges();
+            }
+            using (var context = new AirportsContext())
+            {
+                context.Cities.AddRange(citiesEntities);
+                context.SaveChanges();
+            }
+            using (var context = new AirportsContext())
+            {
+                context.Airports.AddRange(airportEntities);
+                context.SaveChanges();
+            }
+            //using (var context = new AirportsContext())
+            //{
+            //    context.Segments.AddRange(segmentsEntities);
+            //    context.SaveChanges();
+            //}
+            //using (var context = new AirportsContext())
+            //{
+            //    context.Flights.AddRange(flightsEntities);
+            //    context.SaveChanges();
+            //}
         }
 
         private void CreateAutoMapperMappings()
@@ -70,6 +247,18 @@
                 cfg.CreateMap<IOModel.Flight, BsModel.Flight>();
                 cfg.CreateMap<IOModel.Location, BsModel.Location>();
                 cfg.CreateMap<IOModel.Segment, BsModel.Segment>();
+                cfg.CreateMap<Entities.Airline, BsModel.Airline>();
+                cfg.CreateMap<Entities.Airport, BsModel.Airport>();
+                cfg.CreateMap<Entities.City, BsModel.City>();
+                cfg.CreateMap<Entities.Country, BsModel.Country>();
+                cfg.CreateMap<Entities.Flight, BsModel.Flight>();
+                cfg.CreateMap<Entities.Segment, BsModel.Segment>();
+                cfg.CreateMap<IOModel.Airline, Entities.Airline>();
+                cfg.CreateMap<IOModel.Airport, Entities.Airport>();
+                cfg.CreateMap<IOModel.City, Entities.City>();
+                cfg.CreateMap<IOModel.Country, Entities.Country>();
+                cfg.CreateMap<IOModel.Flight, Entities.Flight>();
+                cfg.CreateMap<IOModel.Segment, Entities.Segment>();
             });
         }
 
@@ -80,24 +269,6 @@
                     && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.CitiesCacheFileName))
                     && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.AirlinesCacheFileName))
                     && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.FlightsCacheFileName));
-        }
-
-        private void ReadDataFromCache()
-        {
-            var ioAirports = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airport>>(Path.Combine(this.options.CacheFolderName, this.options.AirportsRawFileName)).ToList();
-            this.Airports = Convert<IOModel.Airport, BsModel.Airport>(ioAirports);
-
-            var ioCities = this.serializer.DeserializeFromJson<IEnumerable<IOModel.City>>(Path.Combine(this.options.CacheFolderName, this.options.CitiesCacheFileName)).ToList();
-            this.Cities = Convert<IOModel.City, BsModel.City>(ioCities);
-            
-            var ioCountries = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Country>>(Path.Combine(this.options.CacheFolderName, this.options.CountriesCacheFileName)).ToList();
-            this.Countries = Convert<IOModel.Country, BsModel.Country>(ioCountries);
-            
-            var ioAirlines = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airline>>(Path.Combine(this.options.CacheFolderName, this.options.AirlinesCacheFileName)).ToList();
-            this.Airlines = Convert<IOModel.Airline, BsModel.Airline>(ioAirlines);
-
-            var ioFlights = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Flight>>(Path.Combine(this.options.CacheFolderName, this.options.FlightsCacheFileName)).ToList();
-            this.Flights = Convert<IOModel.Flight, BsModel.Flight>(ioFlights);
         }
 
         private IEnumerable<TARGET_TYPE> Convert<SOURCE_TYPE, TARGET_TYPE>(IEnumerable<SOURCE_TYPE> sourceCollection)
@@ -120,19 +291,19 @@
             var airportsConversionResult = this.airportsDataConverter.ConvertToModel(airportsParseResult);
 
             var ioAirports = airportsConversionResult.Airports;
-            this.Airports = Convert<IOModel.Airport, BsModel.Airport>(ioAirports);
+            this.airports = Convert<IOModel.Airport, BsModel.Airport>(ioAirports);
 
             var ioCities = airportsConversionResult.Cities;
-            this.Cities = Convert<IOModel.City, BsModel.City>(ioCities);
+            this.cities = Convert<IOModel.City, BsModel.City>(ioCities);
 
             var ioCountries = airportsConversionResult.Countries;
-            this.Countries = Convert<IOModel.Country, BsModel.Country>(ioCountries);
+            this.countries = Convert<IOModel.Country, BsModel.Country>(ioCountries);
 
             var ioAirlines = this.csvHelper.Parse<IOModel.Airline>(Path.Combine(this.options.RawFolderName, this.options.AirlinesRawFileName));
-            this.Airlines = Convert<IOModel.Airline, BsModel.Airline>(ioAirlines);
+            this.airlines = Convert<IOModel.Airline, BsModel.Airline>(ioAirlines);
 
             var ioFlights = this.csvHelper.Parse<IOModel.Flight>(Path.Combine(this.options.RawFolderName, this.options.FlightsRawFileName));
-            this.Flights = Convert<IOModel.Flight, BsModel.Flight>(ioFlights);
+            this.flights = Convert<IOModel.Flight, BsModel.Flight>(ioFlights);
         }
 
         private void SaveDataToCache()

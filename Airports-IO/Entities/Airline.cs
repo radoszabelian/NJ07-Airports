@@ -1,5 +1,5 @@
 ﻿
-namespace Airports_DB.Entities
+namespace Airports_IO.Entities
 {
     public class Airline
     {
