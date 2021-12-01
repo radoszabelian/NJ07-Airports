@@ -12,12 +12,12 @@
     {
         private List<ICommand> commands;
 
-        public Menu(ExerciseResultsUtility resultUtility, GeoLocation geoLocationUtility)
+        public Menu(GeoLocationCommand geoLocationCommand, QueryResultsCommand queryResultsCommand)
         {
             this.commands = new List<ICommand>()
             {
-                resultUtility,
-                geoLocationUtility,
+                geoLocationCommand,
+                queryResultsCommand,
             };
         }
 
