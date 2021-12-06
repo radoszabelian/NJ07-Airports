@@ -7,34 +7,51 @@
     List<Airport> airports = AirportsService.GetAllAirports().ToList();
 }
 <form name="flightSearch">
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                @Html.LabelFor(m => m.IsReturnFlight)
-                @Html.EditorFor(m => m.IsReturnFlight)
-            </div>
-            <div class="col">
-                <label>Departure Airport</label>
-                <select>
-                    @{
-                        foreach (Airport airport in airports)
-                        {
-                            <option value="@airport.Id">@airport.Name.ToString()</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="col">
-                <label>Arrival Airport</label>
-                <select>
-                    @{
-                        foreach (Airport airport in airports)
-                        {
-                            <option value="@airport.Id">@airport.Name</option>
-                        }
-                    }
-                </select>
-            </div>
-        </div>
+    <div class="form-group">
+        <label asp-for="DepartureDate"></label>
+        <input asp-for="DepartureDate" class="form-control"/>
     </div>
+    <div class="form-group">
+        <label asp-for="ReturnDate"></label>
+        <input asp-for="ReturnDate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Departure Airport</label>
+        <select class="form-control">
+            @{
+                foreach (Airport airport in airports)
+                {
+                    <option value="@airport.Id">@airport.Name.ToString()</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Arrival Airport</label>
+        <select class="form-control">
+            @{
+                foreach (Airport airport in airports)
+                {
+                    <option value="@airport.Id">@airport.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="IsReturnFlight"></label>
+        <input asp-for="IsReturnFlight" class="form-check-label" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfAdults"></label>
+        <input asp-for="NumberOfAdults" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfChildren"></label>
+        <input asp-for="NumberOfChildren" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfInfants"></label>
+        <input asp-for="NumberOfInfants" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
 </form>
