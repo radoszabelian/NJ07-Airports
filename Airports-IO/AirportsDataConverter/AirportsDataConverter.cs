@@ -5,12 +5,14 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
 
     public class AirportsDataConverter : IAirportsDataConverter
     {
         private int nextCityId = 0;
         private int nextCountryId = 0;
+        private string timeZonePath = @"data/timezoneinfo.json";
 
         public AirportsExtractedBundle ConvertToModel(List<AirportsParseResult> airportsParseResult)
         {
@@ -130,7 +132,7 @@
 
         private void PopulateTimeZoneDataOfAllLists(List<City> cities, List<Airport> airports)
         {
-            string inputRawJsonData = System.IO.File.ReadAllText(@"data/timezoneinfo.json");
+            string inputRawJsonData = System.IO.File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, timeZonePath));
 
             IEnumerable<TimeZoneInputData> parsedRows = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TimeZoneInputData>>(inputRawJsonData);
 

@@ -6,20 +6,21 @@
     using System.Linq;
     using System.Reflection;
     using Airports_IO.Model;
+    using Airports_Settings.Services;
 
     public class CsvHelper : ICsvHelper
     {
-        private string _rootPath;
+        private readonly string _rootPath = AppDomain.CurrentDomain.BaseDirectory;
 
-        public CsvHelper(string rootPath)
+        public CsvHelper(IConfig config)
         {
-            _rootPath = rootPath;
         }
 
         public List<T> Parse<T>(string filePath)
             where T : new()
         {
             string[] inputRows = System.IO.File.ReadAllLines(Path.Combine(_rootPath, filePath));
+
             List<ColumnHeaderInfo> fileHeaderInfos = null;
 
             List<T> parsedObjects = new List<T>();
@@ -97,6 +98,8 @@
                     {
                         continue;
                     }
+
+                    columnStringValue = columnStringValue.Trim('"');
 
                     deserializedObjectProperty.SetValue(deserializedObject, Convert.ChangeType(columnStringValue, deserializedObjectProperty.PropertyType));
                 }

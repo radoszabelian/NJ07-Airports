@@ -14,11 +14,9 @@ namespace Airports_Client
 {
     public class Startup
     {
-        private readonly string contentRoot;
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
-            contentRoot = env.WebRootPath;
         }
 
         public IConfiguration Configuration { get; }
@@ -35,8 +33,8 @@ namespace Airports_Client
             services.AddSingleton<IConfig>(new ConfigService("appSettings.json"));
             services.AddSingleton<IAirportsDataConverter, AirportsDataConverter>();
             services.AddSingleton<IGeoLocationService, GeoLocationService>();
-            services.AddSingleton<ICsvHelper>(new CsvHelper(contentRoot));
-            services.AddSingleton<ISerializer>(new Serializer(contentRoot));
+            services.AddSingleton<ICsvHelper, CsvHelper>();
+            services.AddSingleton<ISerializer, Serializer>();
             services.AddSingleton<Logger>(NLog.LogManager.GetCurrentClassLogger());
         }
 

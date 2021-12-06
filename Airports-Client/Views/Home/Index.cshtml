@@ -19,7 +19,7 @@
                     @{
                         foreach (Airport airport in airports)
                         {
-                            <option value="@airport.Id">@airport.Name</option>
+                            <option value="@airport.Id">@airport.Name.ToString()</option>
                         }
                     }
                 </select>

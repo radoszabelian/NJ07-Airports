@@ -175,11 +175,11 @@
 
         private void SeedDbFromCache()
         {
-            var ioAirports = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airport>>(Path.Combine(this.options.CacheFolderName, this.options.AirportsRawFileName)).ToList();
-            var ioCities = this.serializer.DeserializeFromJson<IEnumerable<IOModel.City>>(Path.Combine(this.options.CacheFolderName, this.options.CitiesCacheFileName)).ToList();
-            var ioCountries = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Country>>(Path.Combine(this.options.CacheFolderName, this.options.CountriesCacheFileName)).ToList();
-            var ioAirlines = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airline>>(Path.Combine(this.options.CacheFolderName, this.options.AirlinesCacheFileName)).ToList();
-            var ioFlights = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Flight>>(Path.Combine(this.options.CacheFolderName, this.options.FlightsCacheFileName)).ToList();
+            var ioAirports = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airport>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirportsRawFileName)).ToList();
+            var ioCities = this.serializer.DeserializeFromJson<IEnumerable<IOModel.City>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CitiesCacheFileName)).ToList();
+            var ioCountries = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Country>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CountriesCacheFileName)).ToList();
+            var ioAirlines = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airline>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirlinesCacheFileName)).ToList();
+            var ioFlights = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Flight>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.FlightsCacheFileName)).ToList();
 
             var countriesEntities = Convert<IOModel.Country, Entities.Country>(ioCountries);
             var airlinesEntities = Convert<IOModel.Airline, Entities.Airline>(ioAirlines);
@@ -264,11 +264,13 @@
 
         private bool IsCacheAvailable()
         {
-            return File.Exists(Path.Combine(this.options.CacheFolderName, this.options.CountriesCacheFileName))
-                    && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.AirportsRawFileName))
-                    && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.CitiesCacheFileName))
-                    && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.AirlinesCacheFileName))
-                    && File.Exists(Path.Combine(this.options.CacheFolderName, this.options.FlightsCacheFileName));
+            var rootPath = AppDomain.CurrentDomain.BaseDirectory;
+
+            return File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.CountriesCacheFileName))
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.AirportsRawFileName))
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.CitiesCacheFileName))
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.AirlinesCacheFileName))
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.FlightsCacheFileName));
         }
 
         private IEnumerable<TARGET_TYPE> Convert<SOURCE_TYPE, TARGET_TYPE>(IEnumerable<SOURCE_TYPE> sourceCollection)
@@ -287,7 +289,7 @@
 
         private void ParseRawDataFiles()
         {
-            List<IOModel.AirportsParseResult> airportsParseResult = this.csvHelper.Parse<IOModel.AirportsParseResult>(Path.Combine(this.options.RawFolderName, this.options.AirportsRawFileName));
+            List<IOModel.AirportsParseResult> airportsParseResult = this.csvHelper.Parse<IOModel.AirportsParseResult>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.RawFolderName, this.options.AirportsRawFileName));
             var airportsConversionResult = this.airportsDataConverter.ConvertToModel(airportsParseResult);
 
             var ioAirports = airportsConversionResult.Airports;
@@ -299,25 +301,25 @@
             var ioCountries = airportsConversionResult.Countries;
             this.countries = Convert<IOModel.Country, BsModel.Country>(ioCountries);
 
-            var ioAirlines = this.csvHelper.Parse<IOModel.Airline>(Path.Combine(this.options.RawFolderName, this.options.AirlinesRawFileName));
+            var ioAirlines = this.csvHelper.Parse<IOModel.Airline>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.RawFolderName, this.options.AirlinesRawFileName));
             this.airlines = Convert<IOModel.Airline, BsModel.Airline>(ioAirlines);
 
-            var ioFlights = this.csvHelper.Parse<IOModel.Flight>(Path.Combine(this.options.RawFolderName, this.options.FlightsRawFileName));
+            var ioFlights = this.csvHelper.Parse<IOModel.Flight>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.RawFolderName, this.options.FlightsRawFileName));
             this.flights = Convert<IOModel.Flight, BsModel.Flight>(ioFlights);
         }
 
         private void SaveDataToCache()
         {
-            if (!Directory.Exists(this.options.CacheFolderName))
+            if (!Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName)))
             {
-                Directory.CreateDirectory(this.options.CacheFolderName);
+                Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName));
             }
 
-            this.serializer.SerializeToJson(this.Airports, Path.Combine(this.options.CacheFolderName, this.options.AirportsRawFileName));
-            this.serializer.SerializeToJson(this.Cities, Path.Combine(this.options.CacheFolderName, this.options.CitiesCacheFileName));
-            this.serializer.SerializeToJson(this.Countries, Path.Combine(this.options.CacheFolderName, this.options.CountriesCacheFileName));
-            this.serializer.SerializeToJson(this.Flights, Path.Combine(this.options.CacheFolderName, this.options.FlightsCacheFileName));
-            this.serializer.SerializeToJson(this.Airlines, Path.Combine(this.options.CacheFolderName, this.options.AirlinesCacheFileName));
+            this.serializer.SerializeToJson(this.Airports, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirportsRawFileName));
+            this.serializer.SerializeToJson(this.Cities, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CitiesCacheFileName));
+            this.serializer.SerializeToJson(this.Countries, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CountriesCacheFileName));
+            this.serializer.SerializeToJson(this.Flights, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.FlightsCacheFileName));
+            this.serializer.SerializeToJson(this.Airlines, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirlinesCacheFileName));
         }
     }
 }
