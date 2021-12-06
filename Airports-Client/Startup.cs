@@ -1,21 +1,24 @@
+using Aiports_Model;
+using Airports_IO.Services;
+using Airports_Logic.Services;
+using Airports_Logic.Services.GeoLocation;
+using Airports_Settings.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using NLog;
 
 namespace Airports_Client
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly string contentRoot;
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            contentRoot = env.WebRootPath;
         }
 
         public IConfiguration Configuration { get; }
@@ -25,6 +28,16 @@ namespace Airports_Client
         {
             services.AddRazorPages();
             services.AddMvc();
+
+            services.AddSingleton<IAirportsService, AirportsService>();
+            services.AddSingleton<IDataAccessor, DataAccessor>();
+            services.AddSingleton<Airports_Logic.Services.ILogger, LoggerService>();
+            services.AddSingleton<IConfig>(new ConfigService("appSettings.json"));
+            services.AddSingleton<IAirportsDataConverter, AirportsDataConverter>();
+            services.AddSingleton<IGeoLocationService, GeoLocationService>();
+            services.AddSingleton<ICsvHelper>(new CsvHelper(contentRoot));
+            services.AddSingleton<ISerializer>(new Serializer(contentRoot));
+            services.AddSingleton<Logger>(NLog.LogManager.GetCurrentClassLogger());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

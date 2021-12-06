@@ -2,16 +2,24 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using Airports_IO.Model;
 
     public class CsvHelper : ICsvHelper
     {
+        private string _rootPath;
+
+        public CsvHelper(string rootPath)
+        {
+            _rootPath = rootPath;
+        }
+
         public List<T> Parse<T>(string filePath)
             where T : new()
         {
-            string[] inputRows = System.IO.File.ReadAllLines(filePath);
+            string[] inputRows = System.IO.File.ReadAllLines(Path.Combine(_rootPath, filePath));
             List<ColumnHeaderInfo> fileHeaderInfos = null;
 
             List<T> parsedObjects = new List<T>();

@@ -34,6 +34,9 @@
     <None Update="Data\flights.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\segments.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\timezoneinfo.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
