@@ -31,6 +31,17 @@ namespace Airports_IO
             modelBuilder.Entity<Flight>()
                 .Property(a => a.Id)
                 .ValueGeneratedNever();
+            modelBuilder.Entity<Segment>()
+                .Property(a => a.Id)
+                .ValueGeneratedNever();
+            modelBuilder.Entity<Segment>()
+                .HasOne<Airport>()
+                .WithMany()
+                .HasForeignKey(s => s.ArrivalAirportId);
+            modelBuilder.Entity<Segment>()
+                .HasOne<Airport>()
+                .WithMany()
+                .HasForeignKey(s => s.DepartureAirportId);
         }
 
         public DbSet<Airport> Airports { get; set; }

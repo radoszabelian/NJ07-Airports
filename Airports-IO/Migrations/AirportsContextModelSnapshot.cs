@@ -161,9 +161,7 @@ namespace Airports_IO.Migrations
             modelBuilder.Entity("Airports_IO.Entities.Segment", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<int?>("AirlineId")
                         .HasColumnType("int");
@@ -177,6 +175,10 @@ namespace Airports_IO.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AirlineId");
+
+                    b.HasIndex("ArrivalAirportId");
+
+                    b.HasIndex("DepartureAirportId");
 
                     b.ToTable("Segments");
                 });
@@ -219,6 +221,14 @@ namespace Airports_IO.Migrations
                     b.HasOne("Airports_IO.Entities.Airline", "Airline")
                         .WithMany()
                         .HasForeignKey("AirlineId");
+
+                    b.HasOne("Airports_IO.Entities.Airport", null)
+                        .WithMany()
+                        .HasForeignKey("ArrivalAirportId");
+
+                    b.HasOne("Airports_IO.Entities.Airport", null)
+                        .WithMany()
+                        .HasForeignKey("DepartureAirportId");
 
                     b.Navigation("Airline");
                 });

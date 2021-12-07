@@ -18,6 +18,7 @@
         private IEnumerable<BsModel.Airport> airports;
         private IEnumerable<BsModel.Airline> airlines;
         private IEnumerable<BsModel.Flight> flights;
+        private IEnumerable<BsModel.Segment> segments;
 
         private readonly FilePaths options;
         private IConfig configService;
@@ -170,22 +171,27 @@
 
                 var flightsEntities = context.Flights.Include(f => f.Segment).ToList();
                 this.flights = Convert<Entities.Flight, BsModel.Flight>(flightsEntities);
+
+                var segmentsEntities = context.Segments.ToList();
+                this.segments = Convert<Entities.Segment, BsModel.Segment>(segmentsEntities);
             }
         }
 
         private void SeedDbFromCache()
         {
-            var ioAirports = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airport>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirportsRawFileName)).ToList();
+            var ioAirports = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airport>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirportsCacheFileName)).ToList();
             var ioCities = this.serializer.DeserializeFromJson<IEnumerable<IOModel.City>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CitiesCacheFileName)).ToList();
             var ioCountries = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Country>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CountriesCacheFileName)).ToList();
             var ioAirlines = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Airline>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirlinesCacheFileName)).ToList();
             var ioFlights = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Flight>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.FlightsCacheFileName)).ToList();
+            var ioSegments = this.serializer.DeserializeFromJson<IEnumerable<IOModel.Segment>>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.SegmentsCacheFileName)).ToList();
 
             var countriesEntities = Convert<IOModel.Country, Entities.Country>(ioCountries);
             var airlinesEntities = Convert<IOModel.Airline, Entities.Airline>(ioAirlines);
             var flightsEntities = Convert<IOModel.Flight, Entities.Flight>(ioFlights);
             var airportEntities = Convert<IOModel.Airport, Entities.Airport>(ioAirports);
             var citiesEntities = Convert<IOModel.City, Entities.City>(ioCities);
+            var segmentsEntities = Convert<IOModel.Segment, Entities.Segment>(ioSegments);
 
             int index = 0;
             foreach (var airportEntity in airportEntities)
@@ -224,16 +230,16 @@
                 context.Airports.AddRange(airportEntities);
                 context.SaveChanges();
             }
-            //using (var context = new AirportsContext())
-            //{
-            //    context.Segments.AddRange(segmentsEntities);
-            //    context.SaveChanges();
-            //}
-            //using (var context = new AirportsContext())
-            //{
-            //    context.Flights.AddRange(flightsEntities);
-            //    context.SaveChanges();
-            //}
+            using (var context = new AirportsContext())
+            {
+                context.Segments.AddRange(segmentsEntities);
+                context.SaveChanges();
+            }
+            using (var context = new AirportsContext())
+            {
+                context.Flights.AddRange(flightsEntities);
+                context.SaveChanges();
+            }
         }
 
         private void CreateAutoMapperMappings()
@@ -267,10 +273,11 @@
             var rootPath = AppDomain.CurrentDomain.BaseDirectory;
 
             return File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.CountriesCacheFileName))
-                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.AirportsRawFileName))
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.AirportsCacheFileName))
                     && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.CitiesCacheFileName))
                     && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.AirlinesCacheFileName))
-                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.FlightsCacheFileName));
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.FlightsCacheFileName))
+                    && File.Exists(Path.Combine(rootPath, this.options.CacheFolderName, this.options.SegmentsCacheFileName));
         }
 
         private IEnumerable<TARGET_TYPE> Convert<SOURCE_TYPE, TARGET_TYPE>(IEnumerable<SOURCE_TYPE> sourceCollection)
@@ -306,6 +313,9 @@
 
             var ioFlights = this.csvHelper.Parse<IOModel.Flight>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.RawFolderName, this.options.FlightsRawFileName));
             this.flights = Convert<IOModel.Flight, BsModel.Flight>(ioFlights);
+
+            var ioSegments = this.csvHelper.Parse<IOModel.Segment>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.RawFolderName, this.options.SegmentsRawFileName));
+            this.segments = Convert<IOModel.Segment, BsModel.Segment>(ioSegments);
         }
 
         private void SaveDataToCache()
@@ -315,11 +325,12 @@
                 Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName));
             }
 
-            this.serializer.SerializeToJson(this.Airports, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirportsRawFileName));
+            this.serializer.SerializeToJson(this.Airports, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirportsCacheFileName));
             this.serializer.SerializeToJson(this.Cities, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CitiesCacheFileName));
             this.serializer.SerializeToJson(this.Countries, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.CountriesCacheFileName));
             this.serializer.SerializeToJson(this.Flights, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.FlightsCacheFileName));
             this.serializer.SerializeToJson(this.Airlines, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.AirlinesCacheFileName));
+            this.serializer.SerializeToJson(this.segments, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.options.CacheFolderName, this.options.SegmentsCacheFileName));
         }
     }
 }
