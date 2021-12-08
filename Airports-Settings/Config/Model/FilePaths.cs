@@ -18,6 +18,10 @@
 
         public string FlightsCacheFileName { get; set; }
 
+        public string AirportsCacheFileName { get; set; }
+
+        public string SegmentsCacheFileName { get; set; }
+
         public string CacheFolderName { get; set; }
 
         public string RawFolderName { get; set; }

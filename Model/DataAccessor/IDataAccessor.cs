@@ -13,5 +13,7 @@
         public IEnumerable<Airline> Airlines { get; }
 
         public IEnumerable<Flight> Flights { get; }
+
+        public IEnumerable<Segment> Segments { get; }
     }
 }

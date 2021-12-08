@@ -1,13 +1,15 @@
 ﻿namespace Airports_IO.Model
 {
     using Airports_IO.Attributes;
+    using System;
+
     public class Flight
     {
         [Column("arrivalTime")]
-        public string ArrivalTime { get; set; }
+        public TimeSpan ArrivalTime { get; set; }
 
         [Column("departureTime")]
-        public string DepartureTime { get; set; }
+        public TimeSpan DepartureTime { get; set; }
 
         [Column("id")]
         public int Id { get; set; }

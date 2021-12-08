@@ -2,16 +2,25 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using Airports_IO.Model;
+    using Airports_Settings.Services;
 
     public class CsvHelper : ICsvHelper
     {
+        private readonly string _rootPath = AppDomain.CurrentDomain.BaseDirectory;
+
+        public CsvHelper(IConfig config)
+        {
+        }
+
         public List<T> Parse<T>(string filePath)
             where T : new()
         {
-            string[] inputRows = System.IO.File.ReadAllLines(filePath);
+            string[] inputRows = System.IO.File.ReadAllLines(Path.Combine(_rootPath, filePath));
+
             List<ColumnHeaderInfo> fileHeaderInfos = null;
 
             List<T> parsedObjects = new List<T>();
@@ -90,7 +99,15 @@
                         continue;
                     }
 
-                    deserializedObjectProperty.SetValue(deserializedObject, Convert.ChangeType(columnStringValue, deserializedObjectProperty.PropertyType));
+                    columnStringValue = columnStringValue.Trim('"');
+                    
+                    if (deserializedObjectProperty.PropertyType == typeof(TimeSpan))
+                    {
+                        deserializedObjectProperty.SetValue(deserializedObject, TimeSpan.Parse(columnStringValue));
+                    } else
+                    {
+                        deserializedObjectProperty.SetValue(deserializedObject, Convert.ChangeType(columnStringValue, deserializedObjectProperty.PropertyType));
+                    }
                 }
             }
 

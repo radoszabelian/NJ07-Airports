@@ -1,10 +1,12 @@
-﻿namespace Aiports_Model
+﻿using System;
+
+namespace Aiports_Model
 {
     public class Flight
     {
-        public string ArrivalTime { get; set; }
+        public TimeSpan ArrivalTime { get; set; }
 
-        public string DepartureTime { get; set; }
+        public TimeSpan DepartureTime { get; set; }
 
         public int Id { get; set; }
 

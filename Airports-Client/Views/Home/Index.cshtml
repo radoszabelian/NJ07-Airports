@@ -1,0 +1,84 @@
+﻿@model FlightSearchViewModel
+@inject IAirportsService AirportsService
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    List<Airport> airports = AirportsService.GetAllAirports().ToList();
+}
+<form name="flightSearch" method="post">
+    <div class="form-group">
+        <label asp-for="DepartureTime"></label>
+        <input asp-for="DepartureTime" class="form-control" type="time" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ArrivalTime"></label>
+        <input asp-for="ArrivalTime" class="form-control" type="time" />
+    </div>
+    <div class="form-group">
+        <label>Departure Airport</label>
+        <select class="form-control" name="DepartureAirportId">
+            @{
+                foreach (Airport airport in airports)
+                {
+                    <option value="@airport.Id">@airport.Name.ToString()</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Arrival Airport</label>
+        <select class="form-control" name="ArrivalAirportId">
+            @{
+                foreach (Airport airport in airports)
+                {
+                    <option value="@airport.Id">@airport.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="IsReturnFlight"></label>
+        <input asp-for="IsReturnFlight" class="form-check-label" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfAdults"></label>
+        <input asp-for="NumberOfAdults" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfChildren"></label>
+        <input asp-for="NumberOfChildren" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfInfants"></label>
+        <input asp-for="NumberOfInfants" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+@{
+    if (Model != null && Model.FlightsSearchResult != null)
+    {
+        <div class="container mt-4">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <td>Departure Airport Name</td>
+                        <td>Arrival Airport Name</td>
+                        <td>Departure Time</td>
+                        <td>Arrival Time</td>
+                    </tr>
+                </thead>
+                @foreach (var result in Model.FlightsSearchResult)
+                {
+                    <tr>
+                        <td>@result.DepartureAirport.Name</td>
+                        <td>@result.ArrivalAirport.Name</td>
+                        <td>@result.Flight.DepartureTime</td>
+                        <td>@result.Flight.ArrivalTime</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+}

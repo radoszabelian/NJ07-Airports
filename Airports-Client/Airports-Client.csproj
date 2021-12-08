@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Airports_Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Airports-Logic\Airports-Logic.csproj" />
+    <ProjectReference Include="..\Model\Aiports-Model.csproj" />
+  </ItemGroup>
+
+</Project>
