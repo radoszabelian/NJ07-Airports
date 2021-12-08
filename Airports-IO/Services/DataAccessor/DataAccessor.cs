@@ -82,6 +82,14 @@
             }
         }
 
+        public IEnumerable<BsModel.Segment> Segments
+        {
+            get
+            {
+                return segments;
+            }
+        }
+
         private void InitializeAppData()
         {
             CreateAutoMapperMappings();

@@ -1,6 +1,7 @@
 using Aiports_Model;
 using Airports_IO.Services;
 using Airports_Logic.Services;
+using Airports_Logic.Services.FlightsService;
 using Airports_Logic.Services.GeoLocation;
 using Airports_Settings.Services;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +37,7 @@ namespace Airports_Client
             services.AddSingleton<ICsvHelper, CsvHelper>();
             services.AddSingleton<ISerializer, Serializer>();
             services.AddSingleton<Logger>(NLog.LogManager.GetCurrentClassLogger());
+            services.AddSingleton<IFlightService, FlightsSearchService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

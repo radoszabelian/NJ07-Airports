@@ -100,8 +100,14 @@
                     }
 
                     columnStringValue = columnStringValue.Trim('"');
-
-                    deserializedObjectProperty.SetValue(deserializedObject, Convert.ChangeType(columnStringValue, deserializedObjectProperty.PropertyType));
+                    
+                    if (deserializedObjectProperty.PropertyType == typeof(TimeSpan))
+                    {
+                        deserializedObjectProperty.SetValue(deserializedObject, TimeSpan.Parse(columnStringValue));
+                    } else
+                    {
+                        deserializedObjectProperty.SetValue(deserializedObject, Convert.ChangeType(columnStringValue, deserializedObjectProperty.PropertyType));
+                    }
                 }
             }
 
